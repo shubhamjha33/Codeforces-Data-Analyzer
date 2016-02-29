@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html xmlns="https://angularjs.org">
+    <head>
+        <title>Codeforces Data Analyzer</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script type="text/javascript" src="jquery-1.11.3.min.js"></script>
+        <script type="text/javascript" src="angular-1.2.8/angular.js"></script>
+        <script type="text/javascript" src="bootstrap-3.3.5-dist/js/bootstrap.js"></script>
+        <link rel="stylesheet" href="bootstrap-3.3.5-dist/css/bootstrap.css" />
+        <script type="text/javascript" src="jquery-ui-1.11.4.custom/jquery-ui.min.js"></script>
+        <link rel="stylesheet" href="jquery-ui-1.11.4.custom/jquery-ui.css" />
+        <script type="text/javascript">
+            angular.module('angularApp',[]).controller('appController',function($scope,$http){
+                $scope.dataExists=false;
+                $scope.problemsetData=[];
+                $scope.tag='';
+                $scope.$watch('tag',function(newVal,oldVal,scope){
+                    $http.get('/problemset?tag='+$scope.tag).success(function(response){
+                        console.log('success '+$scope.tag);
+                        $scope.problemsetData=[];
+                        for(var i=0;i<20&&i<response.result.problems.length;i++){
+                            $scope.problemsetData.push(response.result.problems[i]);
+                        }
+                        console.log($scope.problemsetData);
+                        if($scope.problemsetData.length>0)
+                            $scope.dataExists=true;
+                        else
+                            $scope.dataExists=false;
+                    }).error(function(response){
+                        console.log('error');
+                        $scope.dataExists=false;
+                    });
+                });
+            });
+        </script>
+    </head>
+    <div class="h3">Codeforces Data Analyzer</div>
+    <body id="ng-app" ng-app="angularApp" ng-controller="appController">
+        <form class="form-group">
+            <select class="form-control" ng-model="tag" multiple>
+                <option value="dp">Dynamic Programming</option>
+                <option value='implementation'>Ad-Hoc</option>
+            </select>
+        </form>
+        <table class='table-striped' ng-show='dataExists'>
+            <tr>
+                <th class="col-md-4">ProblemID</th>
+                <th class="col-md-4">Name</th>
+                <th class="col-md-4">Points</th>
+                <th class="col-md-4">Tags</th>
+            </tr>
+            <tr ng-repeat='itr in problemsetData'>
+                <td class="col-md-4"><a href='http://codeforces.com/problemset/problem/{{itr.contestId}}/{{itr.index}}'>{{itr.contestId+itr.index}}</a></td>
+                <td class="col-md-4">{{itr.name}}</td>
+                <td class="col-md-4">{{itr.points}}</td>
+                <td class="col-md-4">{{itr.tags}}</td>
+            </tr>
+        </table>
+    </body>
+</html>
